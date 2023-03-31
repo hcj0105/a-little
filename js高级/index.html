@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+	</head>
+	<body>
+		<script>
+			function getData(url) {
+				return new Promise((resolve, reject) => {
+					setTimeout(() => {
+						resolve(url)
+					}, 1000)
+				})
+			}
+
+			function* generFn() {
+				const res = yield getData('http://')
+				const res2 = yield getData(res + 'www.')
+				const res3 = yield getData(res2 + 'baidu.com')
+				console.log('res3:', res3)
+			}
+
+			// 封装一个自动执行 生成器 函数的方法，只用于 yield 返回值是 Promise 的情况
+			function execGener(genFn) {
+				const generator = genFn()
+				function exec(res) {
+					const result = generator.next(res)
+					if (result.done) return result.value
+					result.value.then(res => {
+						exec(res)
+					})
+				}
+				exec()
+			}
+
+			execGener(generFn)
+		</script>
+	</body>
+</html>
